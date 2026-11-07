@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+from typing import Any, Final
 
 from homeassistant.const import Platform
 from pyalarmdotcomajax import const as libConst
@@ -98,3 +99,22 @@ PLATFORMS = [
 ]
 
 DEVICE_STATIC_ATTRIBUTES = [libConst.ATTR_STATE_TEXT, libConst.ATTR_MAC_ADDRESS]
+
+
+# Alarm.com reports life-safety zones (smoke, heat, CO) with hasState=false.
+# They are still real sensors that users want to see, so they are kept.
+STATELESS_SENSOR_SUBTYPES: Final = (
+    libSensor.Subtype.SMOKE_DETECTOR,
+    libSensor.Subtype.CO_DETECTOR,
+)
+
+
+def is_supported_sensor(device: Any) -> bool:
+    """Return True if a device should be exposed to Home Assistant."""
+
+    subtype = getattr(device, "device_subtype", None)
+
+    if subtype in SENSOR_SUBTYPE_BLACKLIST:
+        return False
+
+    return bool(getattr(device, "has_state", False)) or subtype in STATELESS_SENSOR_SUBTYPES

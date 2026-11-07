@@ -19,6 +19,17 @@
 
 <hr />
 
+> **This is a maintained fork** of [pyalarmdotcom/alarmdotcom](https://github.com/pyalarmdotcom/alarmdotcom) (v3.0.15), which is no longer maintained. It carries the minimum changes needed to keep the 3.x integration working on Home Assistant 2026.11 and later:
+>
+> - `climate`: import `UnitOfTemperature` from `homeassistant.const` (already in 3.0.15).
+> - `base_device`: build `DeviceInfo` with keyword arguments; stop calling the removed `_friendly_name_internal()`.
+> - `config_flow`: options flow no longer assigns `self.config_entry`; re-authentication updates the existing entry instead of trying to create a new one.
+> - Life-safety sensors (smoke, heat, CO) are exposed again. Alarm.com reports these with `hasState: false`, so earlier versions dropped them. Their state is read from the raw payload; please verify against your own panel that they actually change during a test.
+>
+> **Install:** in the Home Assistant Marketplace (HACS), uninstall the original Alarm.com repository first (it owns the `alarmdotcom` folder), then add `https://github.com/FortranFour/alarmdotcom` as a custom repository and install it. Your existing config entry and entity IDs carry over.
+>
+> For a more thoroughly modernised alternative, see [ibasebcast/ha-alarmdotcom](https://github.com/ibasebcast/ha-alarmdotcom).
+
 This is a custom component that allows Home Assistant to interface with [Alarm.com](https://www.alarm.com/) by using the Alarm.com website's unofficial API. This component is designed primarily to integrate the Alarm.com security system functions; as such, it requires an Alarm.com package which includes security system support.
 
 Please note that Alarm.com may break functionality at any time.

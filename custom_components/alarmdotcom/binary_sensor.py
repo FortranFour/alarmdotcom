@@ -22,7 +22,7 @@ from pyalarmdotcomajax.devices.sensor import Sensor as libSensor
 from pyalarmdotcomajax.devices.water_sensor import WaterSensor as libWaterSensor
 
 from .base_device import AttributeBaseDevice, BaseDevice, HardwareBaseDevice
-from .const import DATA_CONTROLLER, DOMAIN, SENSOR_SUBTYPE_BLACKLIST
+from .const import DATA_CONTROLLER, DOMAIN, is_supported_sensor
 from .controller import AlarmIntegrationController
 from .device_type_langs import LANG_DOOR, LANG_WINDOW
 
@@ -84,7 +84,7 @@ async def async_setup_entry(
             device=device,
         )
         for device in [*controller.api.devices.sensors.values(), *controller.api.devices.water_sensors.values()]
-        if device.device_subtype not in SENSOR_SUBTYPE_BLACKLIST and device.has_state
+        if is_supported_sensor(device)
     )
 
     # Create "virtual" low battery and malfunction sensors.
@@ -97,11 +97,7 @@ async def async_setup_entry(
         )
         for description in ATTRIBUTE_BINARY_SENSORS
         for device in controller.api.devices.all.values()
-        if (
-            description.filter_fn(device)
-            and not (isinstance(device, libSensor) and device.device_subtype in SENSOR_SUBTYPE_BLACKLIST)
-            and device.has_state
-        )
+        if description.filter_fn(device) and (not isinstance(device, libSensor) or is_supported_sensor(device))
     )
 
 
@@ -208,6 +204,15 @@ class BinarySensor(HardwareBaseDevice, BinarySensorEntity):  # type: ignore
                 return False
             case libSensor.DeviceState.OPEN | libSensor.DeviceState.ACTIVE | libWaterSensor.DeviceState.WET:
                 return True
+
+        # Alarm.com reports life-safety zones with hasState=false, so the library
+        # leaves state unset. Fall back to the raw numeric state.
+        if self._device.state is None:
+            match self._device.raw_attributes.get("state"):
+                case 1 | 3:
+                    return False
+                case 2 | 4:
+                    return True
 
         LOGGER.info(
             "Cannot determine binary sensor state for sensor %s. Found raw state of %s.",

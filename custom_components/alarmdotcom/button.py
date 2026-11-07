@@ -16,7 +16,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback, Discovery
 from pyalarmdotcomajax.devices.registry import AllDevices_t
 
 from .base_device import AttributeBaseDevice
-from .const import DATA_CONTROLLER, DEBUG_REQ_EVENT, DOMAIN, SENSOR_SUBTYPE_BLACKLIST
+from .const import DATA_CONTROLLER, DEBUG_REQ_EVENT, DOMAIN, is_supported_sensor
 from .controller import AlarmIntegrationController
 
 LOGGER = logging.getLogger(__name__)
@@ -42,8 +42,7 @@ ATTRIBUTE_BUTTONS: Final = [
         has_entity_name=True,
         entity_category=EntityCategory.DIAGNOSTIC,
         press_fn=lambda hass, device: hass.bus.async_fire(DEBUG_REQ_EVENT, {"device_id": device.id_}),
-        filter_fn=lambda device: device.has_state is True
-        and (getattr(device, "device_subtype") not in SENSOR_SUBTYPE_BLACKLIST),
+        filter_fn=is_supported_sensor,
         icon="mdi:bug",
     ),
 ]

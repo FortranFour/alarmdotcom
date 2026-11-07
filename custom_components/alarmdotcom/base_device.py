@@ -52,12 +52,10 @@ class BaseDevice(CoordinatorEntity):  # type: ignore
         self._attr_extra_state_attributes: MutableMapping[str, Any] = {}
 
         self._attr_device_info = DeviceInfo(
-            {
-                "manufacturer": "Alarm.com",
-                "name": device.name,
-                "identifiers": {(DOMAIN, self._adc_id)},
-                "via_device": (DOMAIN, self._device.partition_id),
-            }
+            manufacturer="Alarm.com",
+            name=device.name,
+            identifiers={(DOMAIN, self._adc_id)},
+            via_device=(DOMAIN, self._device.partition_id),
         )
 
     @property
@@ -103,7 +101,7 @@ class BaseDevice(CoordinatorEntity):  # type: ignore
 
         # LOGGER.debug("************** START DEVICE UPDATE *****************")
         LOGGER.info(
-            f"Updated {self.device_type_name} {self._friendly_name_internal()} ({self._adc_id}): {self.state}"
+            f"Updated {self.device_type_name} {self._device.name} ({self._adc_id}): {self.state}"
         )
         # LOGGER.debug(json.dumps(self._device.raw_attributes, indent=4, sort_keys=True))
         # LOGGER.debug("************** END DEVICE UPDATE *****************")

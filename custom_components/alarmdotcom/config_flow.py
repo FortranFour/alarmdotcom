@@ -267,7 +267,7 @@ class ADCFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):  # type: ignore
     async def async_step_reauth(self, user_input: dict[str, Any] | None = None) -> FlowResult:
         """Perform reauth upon an API authentication error."""
         LOGGER.debug("Reauthenticating.")
-        self._existing_entry = await self.async_set_unique_id(self._config_title)
+        self._existing_entry = self._get_reauth_entry()
         return await self.async_step_reauth_confirm(user_input)
 
     async def async_step_reauth_confirm(self, user_input: dict[str, Any] | None = None) -> FlowResult:
@@ -285,7 +285,6 @@ class ADCOptionsFlowHandler(config_entries.OptionsFlow):  # type: ignore
 
     def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
         """Initialize options flow."""
-        self.config_entry = config_entry
         self.options = dict(config_entry.options)
 
     async def async_step_init(self, user_input: dict[str, Any] | None = None) -> FlowResult:
