@@ -25,6 +25,7 @@
 > - `base_device`: build `DeviceInfo` with keyword arguments; stop calling the removed `_friendly_name_internal()`.
 > - `config_flow`: options flow no longer assigns `self.config_entry`; re-authentication updates the existing entry instead of trying to create a new one.
 > - Devices link to their panel with `via_device_id` and the integration no longer touches the registry's internal `deleted_devices`, clearing the deprecation warnings slated to break in HA 2027.8/2027.9. Requires Home Assistant 2026.8 or later.
+> - Real-time updates work again. The bundled library dials a hard-coded WebSocket host (`webskt.alarm.com:8443`) that Alarm.com has retired; the integration now uses the endpoint Alarm.com returns with the WebSocket token.
 > - Life-safety sensors (smoke, heat, CO) are exposed again. Alarm.com reports these with `hasState: false`, so earlier versions dropped them. Their state is read from the raw payload; please verify against your own panel that they actually change during a test.
 >
 > **Install:** in the Home Assistant Marketplace (HACS), uninstall the original Alarm.com repository first (it owns the `alarmdotcom` folder), then add `https://github.com/FortranFour/alarmdotcom` as a custom repository and install it. Your existing config entry and entity IDs carry over.

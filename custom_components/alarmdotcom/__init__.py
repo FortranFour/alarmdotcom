@@ -35,6 +35,7 @@ from .const import (
     is_supported_sensor,
 )
 from .controller import AlarmIntegrationController
+from . import ws_endpoint_patch
 
 LOGGER = logging.getLogger(__name__)
 
@@ -53,6 +54,8 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
     #
     # Initialize Alarm.com Connection & Data Update Coordinator
     #
+
+    ws_endpoint_patch.apply()
 
     controller = AlarmIntegrationController(hass, config_entry)
 
