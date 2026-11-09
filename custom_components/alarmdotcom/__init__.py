@@ -90,13 +90,6 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
         if is_supported_sensor(device):
             device_ids_via_adc.add(device.id_)
 
-    # Purge deleted devices from Home Assistant
-    for deleted_device in list(device_registry.deleted_devices.values()):
-        for identifier in deleted_device.identifiers:
-            if identifier[0] == DOMAIN:
-                LOGGER.info("Removing orphaned device from Home Assistant: %s", deleted_device.identifiers)
-                del device_registry.deleted_devices[deleted_device.id]
-
     # Will be used during virtual device creation.
     device_ids_via_hass: set[str] = set()
 
@@ -144,6 +137,16 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
             name=camera.name,
             model="Skybell HD",
             manufacturer="Skybell",
+        )
+
+    # Create partition (panel) devices first so that other devices can link to
+    # them through via_device_id.
+    for partition in controller.api.devices.partitions.values():
+        device_registry.async_get_or_create(
+            config_entry_id=config_entry.entry_id,
+            identifiers={(DOMAIN, partition.id_)},
+            manufacturer="Alarm.com",
+            name=partition.name,
         )
 
     # Create real devices

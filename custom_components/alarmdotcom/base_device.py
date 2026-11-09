@@ -9,6 +9,7 @@ from typing import Any, Final
 
 from homeassistant.components import persistent_notification
 from homeassistant.core import callback
+from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.entity import DeviceInfo, EntityCategory, EntityDescription
 from homeassistant.helpers.update_coordinator import (
     CoordinatorEntity,
@@ -51,11 +52,21 @@ class BaseDevice(CoordinatorEntity):  # type: ignore
 
         self._attr_extra_state_attributes: MutableMapping[str, Any] = {}
 
+        # Link to the parent partition's device. Partitions themselves (and any
+        # device whose partition is unknown) have no via device.
+        via_device_id: str | None = None
+        if (partition_id := self._device.partition_id) and partition_id != self._adc_id:
+            partition_device = dr.async_get(controller.hass).async_get_device_by_identifier(
+                (DOMAIN, partition_id), controller.config_entry.entry_id
+            )
+            if partition_device is not None:
+                via_device_id = partition_device.id
+
         self._attr_device_info = DeviceInfo(
             manufacturer="Alarm.com",
             name=device.name,
             identifiers={(DOMAIN, self._adc_id)},
-            via_device=(DOMAIN, self._device.partition_id),
+            via_device_id=via_device_id,
         )
 
     @property
